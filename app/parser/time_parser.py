@@ -1,4 +1,12 @@
 import re
+import datetime
+
+
+def convert_seconds(value):
+    if isinstance(value, tuple):
+        value = list(value)
+        value[1] = str(datetime.timedelta(seconds=value[1]))
+    return value
 
 
 def get_seconds(lst):
@@ -26,7 +34,8 @@ def parse_value(value):
         str_time_lst = re.sub(r'[(,)]',
                               '',
                               ''.join(re.findall(r'\([^()]*\)',
-                                                 str_time)[1].split())).split('.')
+                                                 str_time)[1].split())).split(
+            '.')
         seconds = get_seconds(str_time_lst)
 
         bonus = re.search(r'\bbonus\b', value)

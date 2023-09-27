@@ -1,0 +1,52 @@
+h2 {
+    width: 100%;
+    color: green;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 500px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    color: #000000;
+}
+
+tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.checkboxes label {
+  float: left;
+}
+.checkboxes ul {
+  margin: 0;
+  list-style: none;
+  float: left;
+}

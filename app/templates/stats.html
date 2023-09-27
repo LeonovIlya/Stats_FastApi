@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Статистика</title>
+    <link href="{{ url_for('static', path='/df_style.css') }}" rel="stylesheet">
 </head>
 <body>
 <h2>Статистика:</h2>
+<div id="checkboxes">
+  <ul>
+        {% for i in levels %}
+            <label for="{{ i }}">
+                <input type="checkbox" id="{{ i }}" name="{{ i }}" value="{{ i }}">
+                {{ i }}
+            </label>
+        {% endfor %}
+  </ul>
+</div>
+<div>
     {{ data|safe }}
+</div>
 </body>
 </html>
