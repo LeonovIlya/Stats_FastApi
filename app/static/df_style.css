@@ -1,6 +1,5 @@
-h2 {
+h2, h3 {
     width: 100%;
-    color: green;
     text-align: center;
 }
 
@@ -13,10 +12,14 @@ table {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
-thead tr {
+thead th {
     background-color: #009879;
     color: #ffffff;
     text-align: center;
+}
+
+thead th:last-of-type {
+    background-color: #40693a;
 }
 
 th, td {
@@ -26,11 +29,7 @@ th, td {
 }
 
 tbody tr {
-    border-bottom: 1px solid #dddddd;
-}
-
-tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
+    border-bottom: 1px solid #757373;
 }
 
 tbody tr:last-of-type {
@@ -42,11 +41,122 @@ tbody tr.active-row {
     color: #009879;
 }
 
-.checkboxes label {
-  float: left;
+tbody td:nth-of-type(even) {
+    background-color: #c5c5c5;
 }
-.checkboxes ul {
-  margin: 0;
-  list-style: none;
-  float: left;
+
+tbody td:last-of-type {
+    border-bottom: 1px solid #737373;
+    border-right: 2px solid #009879;
+    background-color: #40693a;
+    font-weight: bold;
+}
+
+#level_selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkselect {
+    position: relative;
+	min-width: 300px;
+	text-align: left;
+}
+.checkselect-control {
+	position: relative;
+	padding: 0 !important;
+}
+.checkselect-control select {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	margin: 0;
+	padding-left: 5px;
+	height: 30px;
+}
+.checkselect-over {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	cursor: pointer;
+}
+.checkselect-popup {
+	display: none;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: auto;
+	max-height: 200px;
+	position: absolute;
+	top: 100%;
+	left: 0px;
+	border: 1px solid #dadada;
+	border-top: none;
+	background: #fff;
+	z-index: 9999;
+	overflow: auto;
+	user-select: none;
+}
+.checkselect label {
+	position: relative;
+	display: block;
+	margin: 0;
+	padding: 4px 6px 4px 25px;
+	font-weight: normal;
+	font-size: 1em;
+	line-height: 1.1;
+	cursor: pointer;
+}
+.checkselect-popup input {
+	position: absolute;
+	top: 5px;
+	left: 8px;
+	margin: 0 !important;
+	padding: 0;
+}
+.checkselect-popup label:hover {
+	background: #03a2ff;
+	color: #fff;
+}
+.checkselect-popup fieldset {
+	display: block;
+	margin:  0;
+	padding: 0;
+	border: none;
+}
+.checkselect-popup fieldset input {
+	left: 15px;
+}
+.checkselect-popup fieldset label {
+	padding-left: 32px;
+}
+.checkselect-popup legend {
+	display: block;
+	margin: 0;
+	padding: 5px 8px;
+	font-weight: 700;
+	font-size: 1em;
+	line-height: 1.1;
+}
+.submit_button{
+    text-align: center;
+}
+
+input[type="submit"] {
+    background-color: #4caf50;
+    color: #fff;
+    padding: 10px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049;
 }

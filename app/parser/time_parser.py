@@ -1,18 +1,22 @@
 import re
-import datetime
+import datetime as dt
 
 
 def convert_seconds(value):
     if isinstance(value, tuple):
         value = list(value)
-        value[1] = str(datetime.timedelta(seconds=value[1]))
+        value[1] = str(dt.timedelta(seconds=value[1]))
     return value
 
 
 def get_seconds(lst):
     seconds = 0
     for i in lst:
-        if i.endswith('h'):
+        if i.endswith('M'):
+            seconds += (int(i.replace('M', '')) * 24 * 60 * 60)
+        elif i.endswith('d'):
+            seconds += (int(i.replace('d', '')) * 24 * 60 * 60)
+        elif i.endswith('h'):
             seconds += (int(i.replace('h', '')) * 60 * 60)
         elif i.endswith('m'):
             seconds += (int(i.replace('m', '')) * 60)
@@ -37,7 +41,6 @@ def parse_value(value):
                                                  str_time)[1].split())).split(
             '.')
         seconds = get_seconds(str_time_lst)
-
         bonus = re.search(r'\bbonus\b', value)
         if bonus:
             seconds -= parse_bonus_penalty(str_time, 'bonus')
