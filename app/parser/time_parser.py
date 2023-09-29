@@ -50,4 +50,4 @@ def parse_value(value):
             seconds += parse_bonus_penalty(str_time, 'penalty')
     else:
         name, seconds = 0, 0
-    return [name, seconds]
+    return f'{name}, {seconds} c.'

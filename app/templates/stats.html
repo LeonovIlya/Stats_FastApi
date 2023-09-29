@@ -9,22 +9,27 @@
     <script src="{{ url_for('static', path='/lvl_choice.js') }}"></script>
 </head>
 <body>
-<h2>Статистика игры:</h2>
-<h3><a href="{{ game_link }}" target="_blank">{{ game_name }}</a></h3>
-<div id="level_selector">
-    <form action="" method="post">
-        <div class="checkselect">
-            {% for i in all_levels %}
-                <label>
-                    <input type="checkbox" name="selected_levels" value="{{ i }}">
-                        {{ i }}
-                </label>
-            {% endfor %}
+<a href="/" class="back_button">↩На главную</a>
+<div class="df_container">
+    <div class="container">
+        <h2>Статистика игры:</h2>
+        <h3><a href="{{ game_link }}" target="_blank" class="game_link">{{ game_name }}</a></h3>
+        <div id="level_selector">
+            <form action="" method="post">
+                <div class="checkselect">
+                    {% for i in all_levels %}
+                        <label>
+                            <input type="checkbox" name="selected_levels" value="{{ i }}">
+                                {{ i }}
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="submit_button">
+                <input type="submit" value="Отправить">
+                </div>
+            </form>
         </div>
-        <div class="submit_button">
-        <input type="submit" value="Отправить">
-        </div>
-    </form>
+    </div>
 </div>
 <div>
     {{ data|safe }}

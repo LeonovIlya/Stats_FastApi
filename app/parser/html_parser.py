@@ -44,12 +44,14 @@ async def get_total_time(df: pd.DataFrame) -> list:
     total_times = {}
     for i in df.columns.values:
         for j in df[i].tolist():
-            if j[0] == 0:
+            k = j.split(',')
+            print(k)
+            if k[0] == '0':
                 pass
-            elif j[0] in total_times:
-                total_times[j[0]] += int(j[1])
+            elif k[0] in total_times:
+                total_times[j[0]] += int(k[1][:-3])
             else:
-                total_times[j[0]] = int(j[1])
+                total_times[j[0]] = int(k[1][:-3])
     return sorted(total_times.items(), key=lambda x: x[1])
 
 

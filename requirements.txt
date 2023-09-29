@@ -1,9 +1,8 @@
-fastapi[all]~=0.103.1
+fastapi[all]==0.103.2
 aiohttp~=3.8.5
 asyncio~=3.4.3
 beautifulsoup4~=4.12.2
 pandas~=2.1.1
-bs4~=0.0.1
 pydantic==2.4.2
 numpy~=1.26.0
 starlette==0.31.1
