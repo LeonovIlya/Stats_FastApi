@@ -5,8 +5,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from typing import Annotated
 
-from app.parser.html_parser import check_url, get_commands_stats, \
-    get_game_name_link
+from app.parsers.html_parser import check_url, get_game_name_link, parse_stats
 
 app = FastAPI()
 
@@ -42,7 +41,7 @@ async def get_stats(request: Request):
     if await check_url(url):
         selected_levels = request.session.get('selected_levels', None)
         game_name, game_link = await get_game_name_link(url)
-        all_levels, data = await get_commands_stats(url, selected_levels)
+        all_levels, data = await parse_stats(url, selected_levels)
         return templates.TemplateResponse(
             'stats.html',
             {'request': request,
