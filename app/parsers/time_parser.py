@@ -31,7 +31,7 @@ def parse_bonus_penalty(str_time, value):
     return get_seconds(bp_time)
 
 
-def parse_value_teams(value: str) -> tuple[str, dt.datetime]:
+def parse_value_teams(value: str) -> list[str, dt.datetime]:
     if isinstance(value, str):
         str_time = re.sub(r'таймаут', '', value)
         team_name = str_time.partition(' (')[0]
@@ -41,15 +41,15 @@ def parse_value_teams(value: str) -> tuple[str, dt.datetime]:
             (level_date[0] + ' ' + level_time[0]),
             '%d.%m.%Y %H:%M:%S.%f')
 
-        bonus = re.search(r'\bбонус\b', value)
-        if bonus:
-            bonus_seconds = parse_bonus_penalty(str_time, 'бонус')
-            level_datetime -= dt.timedelta(seconds=bonus_seconds)
-
-        penalty = re.search(r'\bштраф\b', value)
-        if penalty:
-            penalty_seconds = parse_bonus_penalty(str_time, 'штраф')
-            level_datetime += dt.timedelta(seconds=penalty_seconds)
+        # bonus = re.search(r'\bбонус\b', value)
+        # if bonus:
+        #     bonus_seconds = parse_bonus_penalty(str_time, 'бонус')
+        #     level_datetime -= dt.timedelta(seconds=bonus_seconds)
+        #
+        # penalty = re.search(r'\bштраф\b', value)
+        # if penalty:
+        #     penalty_seconds = parse_bonus_penalty(str_time, 'штраф')
+        #     level_datetime += dt.timedelta(seconds=penalty_seconds)
     else:
         team_name, level_datetime = 0, 0
-    return team_name, level_datetime
+    return [team_name, level_datetime]

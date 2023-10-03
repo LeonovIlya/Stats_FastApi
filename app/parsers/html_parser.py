@@ -37,7 +37,7 @@ async def get_game_name_link(url: str) -> tuple[str, str]:
     return game.get_text(), game_url
 
 
-async def get_game_start_time(url: str):
+async def get_game_start_time(url: str) -> dt.datetime:
     _, game_url = await get_game_name_link(url)
     response = await get_response(game_url + '&lang=ru')
     soup = BeautifulSoup(response, 'html.parser')
@@ -53,19 +53,17 @@ async def check_url(url: str) -> bool:
     return bool(re.search('en.cx/GameStat.aspx\?gid=', url))
 
 
-async def get_total_time(df: pd.DataFrame) -> list:
+async def get_total_time(df: pd.DataFrame):
     total_times = {}
     for i in df.columns.values:
         for j in df[i]:
-            print(j)
-            k = j.split(',')
-            if k[0] == '0':
+            if j[0] == '0':
                 pass
-            elif k[0] in total_times:
-                total_times[j[0]] += int(k[1][:-3])
+            elif j[0] in total_times:
+                total_times[j[0]] += j[1]
             else:
-                total_times[j[0]] = int(k[1][:-3])
-    return sorted(total_times.items(), key=lambda x: x[1])
+                total_times[j[0]] = j[1]
+    return total_times.items()
 
 
 async def get_table_from_url(url: str) -> bs4.element.Tag:
@@ -94,23 +92,38 @@ async def table_to_dataframe(table: bs4.element.Tag) -> \
 
 async def dataframe_to_html(
         df: pd.core.frame.DataFrame,
+        game_start: dt.datetime,
         lvl_list: list[str] = None) -> tuple[np.ndarray, str]:
-    all_columns = df.columns.values  # получаем заголовки столбцов
+    all_columns = df.columns.values  # получаем все заголовки столбцов
     for i in all_columns:
         df[i] = df[i].apply(
-            parse_value_teams)  # парсим каждую ячейку в столбцах
+            parse_value_teams)  # парсим каждую ячейку в столбцах и получаем
+        # лист [команда, время апа]
 
-    # здесь нужна логика получения времени на уровне путем вычитания времен
-    # уровней между собой, если уровень первый - вычитаем время уровня из
-    # времени старта
+    for index, column in reversed(list(enumerate(df))):
+        if index != 0:
+            current_column = df[column]
+            previous_column = df.iloc[:, index - 1]
+            for i in current_column.values:
+                name = i[0]
+                current_datetime = i[1]
+                previous_datetime = 0
+                for j in previous_column:
+                    if j[0] == name:
+                        previous_datetime = j[1]
+                if current_datetime != 0:
+                    i[1] = current_datetime - previous_datetime
+        elif index == 0:
+            for i in df[column].values:
+                i[1] -= game_start
 
     if lvl_list:
         df = df[lvl_list]  # выбираем нужные столбцы
+
     df['Общее время'] = pd.Series(await get_total_time(df))  # добавляем
     # новый столбец с общим временем выбранных столбцов для каждой команды
-    df['Общее время'] = df['Общее время'].apply(convert_seconds)  #
-    # конвертируем секунды в стандартный формат времени
-    df.index = df.index + 1  # нумерация строк не с 0, а с 1
+
+    df.index = df.index + 1  # нумерация строк с 1
     return all_columns, df.to_html()
 
 
@@ -118,9 +131,10 @@ async def parse_stats(url: str, lvl_list: list[str] = None):
     table = await get_table_from_url(url)
     if table:
         dataframe = await table_to_dataframe(table)
-        return await dataframe_to_html(dataframe, lvl_list)
+        game_start = await get_game_start_time(url)
+        return await dataframe_to_html(dataframe, game_start, lvl_list)
     else:
-        return 'Ошибка парсинга статистики! Проверьте доступность статистики ' \
+        return 'Ошибка парсинга статистики! Проверьте доступность статистики '\
                'или попробуйте еще раз!'
 
 
@@ -132,7 +146,7 @@ if __name__ == "__main__":
     start = 0
     try:
         start = time.time()
-        coroutines = [loop.create_task(get_game_start_time(URL))]
+        coroutines = [loop.create_task(parse_stats(URL))]
         loop.run_until_complete(asyncio.wait(coroutines))
     finally:
         loop.close()
