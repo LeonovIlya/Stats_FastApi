@@ -1,15 +1,9 @@
 import re
 import datetime as dt
+import pandas as pd
 
 
-def convert_seconds(value):
-    if isinstance(value, tuple):
-        value = list(value)
-        value[1] = str(dt.timedelta(seconds=value[1]))
-    return value
-
-
-def get_seconds(lst):
+def get_seconds(lst: list) -> int:
     seconds = 0
     for i in lst:
         if i.endswith('М'):
@@ -25,13 +19,14 @@ def get_seconds(lst):
     return seconds
 
 
-def parse_bonus_penalty(str_time, value):
+def parse_bonus_penalty(str_time: str, value: str) -> int:
     bp_time = ''.join(str_time.partition(value)[2].split())
     bp_time = re.findall(r'\d{1,2}\w', bp_time)
     return get_seconds(bp_time)
 
 
 def parse_value_teams(value: str) -> list[str, dt.datetime]:
+    correction = 0
     if isinstance(value, str):
         str_time = re.sub(r'таймаут', '', value)
         team_name = str_time.partition(' (')[0]
@@ -41,15 +36,31 @@ def parse_value_teams(value: str) -> list[str, dt.datetime]:
             (level_date[0] + ' ' + level_time[0]),
             '%d.%m.%Y %H:%M:%S.%f')
 
-        # bonus = re.search(r'\bбонус\b', value)
-        # if bonus:
-        #     bonus_seconds = parse_bonus_penalty(str_time, 'бонус')
-        #     level_datetime -= dt.timedelta(seconds=bonus_seconds)
-        #
-        # penalty = re.search(r'\bштраф\b', value)
-        # if penalty:
-        #     penalty_seconds = parse_bonus_penalty(str_time, 'штраф')
-        #     level_datetime += dt.timedelta(seconds=penalty_seconds)
+        bonus = re.search(r'\bбонус\b', value)
+        if bonus:
+            bonus_seconds = parse_bonus_penalty(str_time, 'бонус')
+            correction -= bonus_seconds
+        penalty = re.search(r'\bштраф\b', value)
+        if penalty:
+            penalty_seconds = parse_bonus_penalty(str_time, 'штраф')
+            correction += penalty_seconds
     else:
         team_name, level_datetime = 0, 0
-    return [team_name, level_datetime]
+    return [team_name, level_datetime, correction]
+
+
+async def get_total_time(df: pd.DataFrame) -> tuple[list, list]:
+    clear_total_times = {}
+    total_times = {}
+    for i in df.columns.values:
+        for j in df[i]:
+            if j[0] == '0':
+                pass
+            elif j[0] in clear_total_times:
+                clear_total_times[j[0]] += j[1]
+                total_times[j[0]] += (j[1] + dt.timedelta(seconds=j[2]))
+            else:
+                clear_total_times[j[0]] = j[1]
+                total_times[j[0]] = (j[1] + dt.timedelta(seconds=j[2]))
+    return sorted(clear_total_times.items(), key=lambda x: x[1]), sorted(
+        total_times.items(), key=lambda x: x[1])

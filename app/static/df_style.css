@@ -35,7 +35,8 @@ table {
     margin: 25px 0;
     font-size: 0.9em;
     font-family: sans-serif;
-    min-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -49,7 +50,7 @@ thead th:nth-of-type(even) {
     background-color: #004500;
 }
 
-thead th:last-of-type {
+thead th:nth-last-child(-n + 3) {
     background-color: #5C0000;
 }
 
@@ -73,7 +74,7 @@ tbody td:nth-of-type(even) {
     background-color: #067806;
 }
 
-tbody td:last-of-type {
+tbody td:nth-last-child(-n + 3) {
     border-bottom: 1px solid #737373;
     border-right: 2px solid #009879;
     background-color: #5C0000;

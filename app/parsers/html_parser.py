@@ -6,18 +6,18 @@ import bs4
 import numpy as np
 import aiohttp
 import pandas as pd
+import swifter
 from url_parser import get_base_url
 from bs4 import BeautifulSoup
 
-from app.parsers.time_parser import parse_value_teams, convert_seconds
+from app.parsers.time_parser import get_total_time, parse_value_teams
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) '
                   'Gecko/20100101 Firefox/28.0',
     'Accept': 'application/json, text/javascript, */*; q=0.01',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Accept-Language': 'en-US'
+    'X-Requested-With': 'XMLHttpRequest'
 }
 
 
@@ -53,19 +53,6 @@ async def check_url(url: str) -> bool:
     return bool(re.search('en.cx/GameStat.aspx\?gid=', url))
 
 
-async def get_total_time(df: pd.DataFrame):
-    total_times = {}
-    for i in df.columns.values:
-        for j in df[i]:
-            if j[0] == '0':
-                pass
-            elif j[0] in total_times:
-                total_times[j[0]] += j[1]
-            else:
-                total_times[j[0]] = j[1]
-    return total_times.items()
-
-
 async def get_table_from_url(url: str) -> bs4.element.Tag:
     response = await get_response(url + '&sortfield=SpentSeconds&lang=ru')
     soup = BeautifulSoup(response, 'html.parser')
@@ -90,15 +77,27 @@ async def table_to_dataframe(table: bs4.element.Tag) -> \
     return df
 
 
+def repr_value(value: list) -> str:
+    if len(value) == 2:
+        return f'{value[0]}<br>{value[1]}'
+    elif len(value) == 3:
+        if value[2] == 0:
+            return f'{value[0]}<br>{value[1]}'
+        elif value[2] > 0:
+            return f'{value[0]}<br>{value[1]}<br>Штраф: {value[2]} c.'
+        elif value[2] < 0:
+            return f'{value[0]}<br>{value[1]}<br>Бонус: {abs(value[2])} c.'
+
+
 async def dataframe_to_html(
         df: pd.core.frame.DataFrame,
         game_start: dt.datetime,
         lvl_list: list[str] = None) -> tuple[np.ndarray, str]:
+
     all_columns = df.columns.values  # получаем все заголовки столбцов
     for i in all_columns:
-        df[i] = df[i].apply(
-            parse_value_teams)  # парсим каждую ячейку в столбцах и получаем
-        # лист [команда, время апа]
+        df[i] = df[i].swifter.apply(parse_value_teams)  # парсим каждую ячейку
+        # в столбцах и получаем лист [команда, время апа]
 
     for index, column in reversed(list(enumerate(df))):
         if index != 0:
@@ -120,11 +119,13 @@ async def dataframe_to_html(
     if lvl_list:
         df = df[lvl_list]  # выбираем нужные столбцы
 
-    df['Общее время'] = pd.Series(await get_total_time(df))  # добавляем
-    # новый столбец с общим временем выбранных столбцов для каждой команды
-
+    clear_time, total_time = await get_total_time(df)
+    df.loc[:, 'Общее чистое время'] = pd.Series(clear_time)
+    df.loc[:, 'Общее время с учетом бонусов и штрафов'] = pd.Series(total_time)
+    df = df.swifter.applymap(repr_value)
     df.index = df.index + 1  # нумерация строк с 1
-    return all_columns, df.to_html()
+    df['Место'] = df.index
+    return all_columns, df.to_html(index_names=False, escape=False)
 
 
 async def parse_stats(url: str, lvl_list: list[str] = None):
@@ -136,18 +137,3 @@ async def parse_stats(url: str, lvl_list: list[str] = None):
     else:
         return 'Ошибка парсинга статистики! Проверьте доступность статистики '\
                'или попробуйте еще раз!'
-
-
-URL = 'https://dozorekb.en.cx/GameStat.aspx?gid=76109'
-TEST_URL = 'test_stat.html'
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    start = 0
-    try:
-        start = time.time()
-        coroutines = [loop.create_task(parse_stats(URL))]
-        loop.run_until_complete(asyncio.wait(coroutines))
-    finally:
-        loop.close()
-        print(f"Время выполнения: {time.time() - start}")
