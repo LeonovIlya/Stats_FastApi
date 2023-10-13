@@ -28,16 +28,19 @@ async def get_index(request: Request):
 
 @app.post('/', response_class=HTMLResponse)
 async def send_url(request: Request,
-                   url: Annotated[str, Form()]):
-    request.session['url'] = url
-    return RedirectResponse(url='/stats', status_code=303)
+                   url: Annotated[str | None, Form()] = None):
+    if url:
+        request.session['url'] = url
+        return RedirectResponse(url='/stats', status_code=303)
+    return 'URL обязателен!'
 
 
 @app.get('/stats', response_class=HTMLResponse)
 async def get_stats(request: Request):
     url = request.session.get('url', None)
     if not url:
-        return 'Кажется вы забыли указать ссылку на статистику!'
+        return 'Кажется вы забыли указать ссылку на статистику или сессия ' \
+               'устарела!<br><a href="/">Вернуться на главную страницу</a>'
     try:
         if await check_url(url):
             selected_levels = request.session.get('selected_levels', None)
@@ -58,6 +61,6 @@ async def get_stats(request: Request):
 
 @app.post('/stats', response_class=HTMLResponse)
 async def post_stats(request: Request,
-                     selected_levels: Annotated[list, Form()]):
+                     selected_levels: Annotated[list, Form()] = None):
     request.session['selected_levels'] = selected_levels
     return RedirectResponse(url='/stats', status_code=303)

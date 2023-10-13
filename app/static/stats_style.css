@@ -12,28 +12,31 @@ body {
     align-items: center;
 }
 
-h2, h3 {
-    width: 100%;
-    text-align: center;
-}
-
 .game_link{
     color: #006000;
 }
 
 .container {
     background-color: #222;
-    padding: 20px;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
 }
 
+.container_text {
+    margin: 10px 0 10px 0;
+    width: 100%;
+    min-height: 20px;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
 table {
     border-collapse: collapse;
     margin: 25px 0;
-    font-size: 0.9em;
+    font-size: 0.8em;
     font-family: sans-serif;
     margin-left: auto;
     margin-right: auto;
@@ -43,6 +46,7 @@ table {
 thead th {
     background-color: #006000;
     color: #77ff00;
+    width: 100px;
     text-align: center;
 }
 
@@ -54,9 +58,17 @@ thead th:nth-last-child(-n + 3) {
     background-color: #5C0000;
 }
 
+thead th:last-of-type {
+    width: 30px;
+}
+
+thead th:first-of-type {
+    width: 30px;
+}
+
 th, td {
     word-wrap: normal;
-    padding: 12px 15px;
+    padding: 5px 5px 5px 5px;
     text-align: center;
     color: #00ff00;
     background-color: #045904;
@@ -207,5 +219,22 @@ input[type="submit"]:hover {
 }
 
 .back_button:hover {
+    background-color: #004000;
+}
+
+.reset_button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-decoration: none;
+    background-color: #008000;
+    color: #111;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.reset_button:hover {
     background-color: #004000;
 }

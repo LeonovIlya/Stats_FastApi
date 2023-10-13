@@ -45,22 +45,28 @@ def parse_value_teams(value: str) -> list[str, dt.datetime]:
             penalty_seconds = parse_bonus_penalty(str_time, 'штраф')
             correction += penalty_seconds
     else:
-        team_name, level_datetime = 0, 0
+        team_name, level_datetime = None, 0
     return [team_name, level_datetime, correction]
 
 
 async def get_total_time(df: pd.DataFrame) -> tuple[list, list]:
     clear_total_times = {}
     total_times = {}
+    lvl_counter = 1
     for i in df.columns.values:
         for j in df[i]:
-            if j[0] == '0':
+            if j[0] is None:
                 pass
             elif j[0] in clear_total_times:
-                clear_total_times[j[0]] += j[1]
-                total_times[j[0]] += (j[1] + dt.timedelta(seconds=j[2]))
+                clear_total_times[j[0]][0] += j[1]
+                clear_total_times[j[0]][1] += 1
+                total_times[j[0]][0] += (j[1] + dt.timedelta(seconds=j[2]))
+                total_times[j[0]][1] += 1
             else:
-                clear_total_times[j[0]] = j[1]
-                total_times[j[0]] = (j[1] + dt.timedelta(seconds=j[2]))
-    return sorted(clear_total_times.items(), key=lambda x: x[1]), sorted(
-        total_times.items(), key=lambda x: x[1])
+                clear_total_times[j[0]] = [j[1], lvl_counter]
+                total_times[j[0]] = [(j[1] + dt.timedelta(seconds=j[2])),
+                                     lvl_counter]
+    return sorted(clear_total_times.items(),
+                  key=lambda x: (-x[1][1], x[1][0])), \
+           sorted(total_times.items(),
+                  key=lambda x: (-x[1][1], x[1][0]))

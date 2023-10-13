@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Статистика</title>
-    <link href="{{ url_for('static', path='/df_style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/stats_style.css') }}" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="{{ url_for('static', path='/lvl_choice.js') }}"></script>
 </head>
 <body>
 <a href="/" class="back_button">↩На главную</a>
+<a href="/stats" class="reset_button">Сбросить</a>
 <div class="df_container">
     <div class="container">
-        <h2>Статистика игры:</h2>
-        <h3><a href="{{ game_link }}" target="_blank" class="game_link">{{ game_name }}</a></h3>
+        <div class="container_text">Статистика игры:</div>
+        <div class="container_text"><a href="{{ game_link }}" target="_blank" class="game_link">{{ game_name }}</a></div>
         <div id="level_selector">
             <form action="" method="post">
                 <div class="checkselect">

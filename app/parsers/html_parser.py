@@ -73,20 +73,23 @@ async def table_to_dataframe(table: bs4.element.Tag) -> \
     df.columns = df.iloc[0]  # заголовки столбцов = первая строка таблицы
     df = df[1:]  # удаляем лишнюю строку
     df = df.reset_index(drop=True)  # сбрасываем индекс без сохранения столбца
-    df = df.fillna(0)  # заполняем нулями значения NaN
+    # df = df.fillna(0)  # заполняем нулями значения NaN
     return df
 
 
 def repr_value(value: list) -> str:
-    if len(value) == 2:
-        return f'{value[0]}<br>{value[1]}'
-    elif len(value) == 3:
-        if value[2] == 0:
+    if isinstance(value, list):
+        if len(value) == 2:
             return f'{value[0]}<br>{value[1]}'
-        elif value[2] > 0:
-            return f'{value[0]}<br>{value[1]}<br>Штраф: {value[2]} c.'
-        elif value[2] < 0:
-            return f'{value[0]}<br>{value[1]}<br>Бонус: {abs(value[2])} c.'
+        elif len(value) == 3:
+            if value[2] == 0:
+                return f'{value[0]}<br>{value[1]}'
+            elif value[2] > 0:
+                return f'{value[0]}<br>{value[1]}<br>Штраф: {value[2]} c.'
+            elif value[2] < 0:
+                return f'{value[0]}<br>{str(value[1])}<br>Бонус: {abs(value[2])} c.'
+    elif isinstance(value, tuple):
+        return f'{value[0]}<br>{value[1][0]}<br>({value[1][1]})'
 
 
 async def dataframe_to_html(
