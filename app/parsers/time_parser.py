@@ -25,11 +25,15 @@ def parse_bonus_penalty(str_time: str, value: str) -> int:
     return get_seconds(bp_time)
 
 
-def parse_value_teams(value: str) -> list[str, dt.datetime]:
+def parse_value_teams(value: str, solo: bool = False) \
+        -> list[str, dt.datetime]:
     correction = 0
     if isinstance(value, str):
         str_time = re.sub(r'таймаут', '', value)
-        team_name = str_time.partition(' (')[0]
+        if solo:
+            team_name = re.split(r'\s\d\d\.\d\d\.\d\d\d\d', str_time)[0]
+        else:
+            team_name = str_time.partition(' (')[0]
         level_date = re.search(r'\d\d\.\d\d\.\d\d\d\d', value)
         level_time = re.search(r'\d\d:\d\d:\d\d\.\d\d\d', value)
         level_datetime = dt.datetime.strptime(

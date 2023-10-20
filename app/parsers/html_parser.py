@@ -7,10 +7,13 @@ import numpy as np
 import aiohttp
 import pandas as pd
 import swifter
+import warnings
 from url_parser import get_base_url
 from bs4 import BeautifulSoup
 
 from app.parsers.time_parser import get_total_time, parse_value_teams
+
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) '
@@ -37,7 +40,7 @@ async def get_game_name_link(url: str) -> tuple[str, str]:
     return game.get_text(), game_url
 
 
-async def get_game_start_time(url: str) -> dt.datetime:
+async def get_game_start_time(url: str) -> tuple[dt.datetime, bool]:
     _, game_url = await get_game_name_link(url)
     response = await get_response(game_url + '&lang=ru')
     soup = BeautifulSoup(response, 'html.parser')
@@ -46,7 +49,13 @@ async def get_game_start_time(url: str) -> dt.datetime:
     start_time = re.search(r'\d\d\.\d\d\.\d\d\d\d \d*:\d\d:\d\d',
                            start_time)
     start_time = dt.datetime.strptime(start_time[0], '%d.%m.%Y %H:%M:%S')
-    return start_time
+    solo = soup.find('span',
+                     string='Играем').find_next().text
+    if re.search('В одиночку', solo):
+        solo = True
+    elif re.search('Командами', solo):
+        solo = False
+    return start_time, solo
 
 
 async def check_url(url: str) -> bool:
@@ -95,12 +104,13 @@ def repr_value(value: list) -> str:
 async def dataframe_to_html(
         df: pd.core.frame.DataFrame,
         game_start: dt.datetime,
-        lvl_list: list[str] = None) -> tuple[np.ndarray, str]:
+        lvl_list: list[str] = None,
+        solo: bool = False) -> tuple[np.ndarray, str]:
 
     all_columns = df.columns.values  # получаем все заголовки столбцов
     for i in all_columns:
-        df[i] = df[i].swifter.apply(parse_value_teams)  # парсим каждую ячейку
-        # в столбцах и получаем лист [команда, время апа]
+        df[i] = df[i].swifter.apply(parse_value_teams, solo=solo)  # парсим
+        # каждую ячейку в столбцах и получаем лист [команда, время апа]
 
     for index, column in reversed(list(enumerate(df))):
         if index != 0:
@@ -135,8 +145,8 @@ async def parse_stats(url: str, lvl_list: list[str] = None):
     table = await get_table_from_url(url)
     if table:
         dataframe = await table_to_dataframe(table)
-        game_start = await get_game_start_time(url)
-        return await dataframe_to_html(dataframe, game_start, lvl_list)
+        game_start, solo = await get_game_start_time(url)
+        return await dataframe_to_html(dataframe, game_start, lvl_list, solo)
     else:
         return 'Ошибка парсинга статистики! Проверьте доступность статистики '\
                'или попробуйте еще раз!'

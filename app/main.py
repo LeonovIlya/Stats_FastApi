@@ -20,7 +20,7 @@ app.add_middleware(SessionMiddleware,
 @app.get('/', response_class=HTMLResponse)
 async def get_index(request: Request):
     request.session['url'] = None
-    request.session['selected_levels'] = None
+    request.session['selected_levels'] = []
     return templates.TemplateResponse(
         'index.html',
         {'request': request})
@@ -43,7 +43,7 @@ async def get_stats(request: Request):
                'устарела!<br><a href="/">Вернуться на главную страницу</a>'
     try:
         if await check_url(url):
-            selected_levels = request.session.get('selected_levels', None)
+            selected_levels = request.session.get('selected_levels')
             game_name, game_link = await get_game_name_link(url)
             all_levels, data = await parse_stats(url, selected_levels)
             return templates.TemplateResponse(
@@ -62,5 +62,8 @@ async def get_stats(request: Request):
 @app.post('/stats', response_class=HTMLResponse)
 async def post_stats(request: Request,
                      selected_levels: Annotated[list, Form()] = None):
-    request.session['selected_levels'] = selected_levels
+    if selected_levels is None:
+        request.session['selected_levels'] = []
+    else:
+        request.session['selected_levels'] = selected_levels
     return RedirectResponse(url='/stats', status_code=303)
