@@ -12,6 +12,7 @@ from url_parser import get_base_url
 from bs4 import BeautifulSoup
 
 from app.parsers.time_parser import get_total_time, parse_value_teams
+from aiohttp.client_exceptions import ClientError
 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
@@ -148,5 +149,4 @@ async def parse_stats(url: str, lvl_list: list[str] = None):
         game_start, solo = await get_game_start_time(url)
         return await dataframe_to_html(dataframe, game_start, lvl_list, solo)
     else:
-        return 'Ошибка парсинга статистики! Проверьте доступность статистики '\
-               'или попробуйте еще раз!'
+        raise ClientError

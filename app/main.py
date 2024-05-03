@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from typing import Annotated
-from aiohttp.client_exceptions import ClientConnectorError
+from aiohttp.client_exceptions import ClientError, ClientConnectorError
 from app.parsers.html_parser import check_url, get_game_name_link, parse_stats
 
 app = FastAPI()
@@ -56,6 +56,9 @@ async def get_stats(request: Request):
                  'data': data})
     except ClientConnectorError:
         return 'Ошибка подключения к серверу Encounter!'
+    except ClientError:
+        return 'Ошибка парсинга статистики! Проверьте доступность статистики '\
+               'или попробуйте еще раз!'
     return 'Неверная ссылка на статистику!'
 
 
